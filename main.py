@@ -42,11 +42,16 @@ def main():
     create_manifest_json(asset_path=f"{PK_PASS_NAME}.pass")
 
     certificate_password: Optional[str] = None
+    skip_value = False
     for index, arg in enumerate(sys.argv[1:]):
+        if skip_value:
+            skip_value = False
+            continue
         match arg:
             case "--cert-pass":
                 if index + 1 < len(sys.argv[index:]):
                     certificate_password = sys.argv[index + 2]
+                    skip_value = True
                 else:
                     print("--cert-pass requires a password")
                     return
