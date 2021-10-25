@@ -60,9 +60,12 @@ def main():
         print("No certificate password provided")
         return
 
+    #  Create pass certificate
     os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -clcerts -nokeys -out passcertificate.pem -passin pass:{certificate_password}")
-
+    # Create pass key
     os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -nocerts -out passkey.pem -passin pass:{certificate_password} -passout pass:{KEY_PASSWORD}")
+    # Create signature
+    os.system(f"{OPENSSL_APP} smime -binary -sign -certfile {WWDR_PATH} -signer passcertificate.pem -inkey passkey.pem -in manifest.json -out signature -outform DER -passin pass:{KEY_PASSWORD}")
 
 
 
