@@ -1,6 +1,7 @@
 import json
 import hashlib
 import os
+import sys
 
 from pass_dict import pass_dict
 
@@ -39,6 +40,9 @@ def main():
         f.write(pass_dict_json)
 
     create_manifest_json(asset_path=f"{PK_PASS_NAME}.pass")
+
+    for arg in sys.argv:
+        print(arg)
 
     os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -clcerts -nokeys -out passcertificate.pem -passin pass:{CERTIFICATE_PASSWORD}")
 
