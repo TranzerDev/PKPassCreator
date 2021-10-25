@@ -2,10 +2,10 @@ import json
 import hashlib
 import os
 import sys
+from typing import Optional
 
 from pass_dict import pass_dict
 
-CERTIFICATE_PASSWORD = "password"
 KEY_PASSWORD = "password"
 WWDR_PATH = "WWDR.pem"
 CERTIFICATE_PATH = "certificates.p12"
@@ -41,10 +41,21 @@ def main():
 
     create_manifest_json(asset_path=f"{PK_PASS_NAME}.pass")
 
-    for arg in sys.argv:
-        print(arg)
+    certificate_password: Optional[str] = None
+    for index, arg in enumerate(sys.argv[1:]):
+        match arg:
+            case "--cert-pass":
+                if index + 1 < len(sys.argv[index:]):
+                    certificate_password = sys.argv[index + 2]
+                else:
+                    print("--cert-pass requires a password")
+                    return
 
-    os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -clcerts -nokeys -out passcertificate.pem -passin pass:{CERTIFICATE_PASSWORD}")
+    if not certificate_password:
+        print("No certificate password provided")
+        return
+
+    os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -clcerts -nokeys -out passcertificate.pem -passin pass:{certificate_password}")
 
 
 def create_manifest_json(asset_path: str):
@@ -71,6 +82,5 @@ def create_pass_dict(pass_type_identifier: str, team_identifier: str):
     pass_dict_copy["passTypeIdentifier"] = pass_type_identifier
     pass_dict_copy["teamIdentifier"] = team_identifier
     return pass_dict_copy
-
 
 main()
