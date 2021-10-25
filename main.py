@@ -12,6 +12,21 @@ PASS_TYPE_IDENTIFIER = "com.apple.application-password"
 TEAM_IDENTIFIER = "2V9Z6R8X2R"
 PK_PASS_NAME = "Generic"
 
+SUPPORTED_ASSET_FILES = [
+    "icon.png",
+    "icon@2x.png",
+    "background.png",
+    "background@2x.png",
+    "logo.png",
+    "logo@2x.png",
+    "footer.png",
+    "footer@2x.png",
+    "strip.png",
+    "strip@2x.png",
+    "thumbnail.png",
+    "thumbnail@2x.png",
+]
+
 
 def main():
     pass_dict_copy = create_pass_dict(
@@ -22,8 +37,8 @@ def main():
     with open(f"{PK_PASS_NAME}.pass/pass.json", "w") as f:
         f.write(pass_dict_json)
 
-
     create_manifest_json(asset_path=f"{PK_PASS_NAME}.pass")
+
 
 def create_manifest_json(asset_path: str):
     with open(f"{asset_path}/pass.json", "r") as f:
@@ -31,11 +46,18 @@ def create_manifest_json(asset_path: str):
 
     hashed_pass_json = hashlib.sha1(json.dumps(pass_json).encode("utf-8")).hexdigest()
 
+    manifest_dict = {"pass.json": hashed_pass_json}
+
     for (_, _, filenames) in walk(asset_path):
         for filename in filenames:
-            match filename:
-                case 'icon.png':
-                    print(filename)
+            if filename in SUPPORTED_ASSET_FILES:
+                manifest_dict[filename] = hashlib.sha1(
+                    open(f"{asset_path}/{filename}", "rb").read()
+                ).hexdigest()
+
+    with open(f"manifest.json", "w") as f:
+        f.write(json.dumps(manifest_dict, indent=4))
+
 
 def create_pass_dict(pass_type_identifier: str, team_identifier: str):
     pass_dict_copy = pass_dict.copy()
