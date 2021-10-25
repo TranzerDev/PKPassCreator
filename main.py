@@ -2,6 +2,7 @@ import json
 import hashlib
 import os
 import sys
+import shutil
 from typing import Optional
 
 from pass_dict import pass_dict
@@ -67,6 +68,21 @@ def main():
     # Create signature
     os.system(f"{OPENSSL_APP} smime -binary -sign -certfile {WWDR_PATH} -signer passcertificate.pem -inkey passkey.pem -in manifest.json -out signature -outform DER -passin pass:{KEY_PASSWORD}")
 
+    asset_files_to_delete = [
+        "passkey.pem",
+        "passcertificate.pem",
+        "signature",
+        f"{PK_PASS_NAME}.pass/pass.json",
+    ]
+
+    for (_, _, filenames) in os.walk(f"{PK_PASS_NAME}.pass"):
+        for filename in filenames:
+            if filename in SUPPORTED_ASSET_FILES:
+                shutil.copy2(f"{PK_PASS_NAME}.pass/{filename}", filename)
+                asset_files_to_delete.append(filename)
+
+    for asset_file in asset_files_to_delete:
+        os.remove(asset_file)
 
 
 def create_manifest_json(asset_path: str):
