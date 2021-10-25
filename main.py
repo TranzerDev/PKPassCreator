@@ -1,16 +1,17 @@
 import json
 import hashlib
-from os import walk
+import os
 
 from pass_dict import pass_dict
 
 CERTIFICATE_PASSWORD = "password"
 KEY_PASSWORD = "password"
-WWDR_PATH = "Apple Worldwide Developer Relations Certification Authority.pem"
+WWDR_PATH = "WWDR.pem"
 CERTIFICATE_PATH = "certificates.p12"
 PASS_TYPE_IDENTIFIER = "com.apple.application-password"
 TEAM_IDENTIFIER = "2V9Z6R8X2R"
 PK_PASS_NAME = "Generic"
+OPENSSL_APP = "openssl"
 
 SUPPORTED_ASSET_FILES = [
     "icon.png",
@@ -39,6 +40,8 @@ def main():
 
     create_manifest_json(asset_path=f"{PK_PASS_NAME}.pass")
 
+    os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -clcerts -nokeys -out passcertificate.pem -passin pass:{CERTIFICATE_PASSWORD}")
+
 
 def create_manifest_json(asset_path: str):
     with open(f"{asset_path}/pass.json", "r") as f:
@@ -48,7 +51,7 @@ def create_manifest_json(asset_path: str):
 
     manifest_dict = {"pass.json": hashed_pass_json}
 
-    for (_, _, filenames) in walk(asset_path):
+    for (_, _, filenames) in os.walk(asset_path):
         for filename in filenames:
             if filename in SUPPORTED_ASSET_FILES:
                 manifest_dict[filename] = hashlib.sha1(

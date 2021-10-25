@@ -4,3 +4,5 @@ __pycache__
 Apple Worldwide Developer Relations Certification Authority.pem
 Certificates.p12
 manifest.json
+WWDR.pem
+passcertificate.pem
