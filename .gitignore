@@ -6,3 +6,4 @@ Certificates.p12
 manifest.json
 WWDR.pem
 passcertificate.pem
+passkey.pem

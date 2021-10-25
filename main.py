@@ -56,11 +56,14 @@ def main():
                     print("--cert-pass requires a password")
                     return
 
-    if not certificate_password:
+    if certificate_password is None:
         print("No certificate password provided")
         return
 
     os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -clcerts -nokeys -out passcertificate.pem -passin pass:{certificate_password}")
+
+    os.system(f"{OPENSSL_APP} pkcs12 -in {CERTIFICATE_PATH} -nocerts -out passkey.pem -passin pass:{certificate_password} -passout pass:{KEY_PASSWORD}")
+
 
 
 def create_manifest_json(asset_path: str):
