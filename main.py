@@ -4,6 +4,7 @@ import os
 import sys
 import shutil
 from typing import Optional
+from zipfile import ZipFile
 
 from pass_dict import pass_dict
 
@@ -37,7 +38,7 @@ def main():
         team_identifier=TEAM_IDENTIFIER,
     )
     pass_dict_json = json.dumps(pass_dict_copy, indent=4)
-    with open(f"{PK_PASS_NAME}.pass/pass.json", "w") as f:
+    with open("pass.json", "w") as f:
         f.write(pass_dict_json)
 
     create_manifest_json(asset_path=f"{PK_PASS_NAME}.pass")
@@ -72,7 +73,12 @@ def main():
         "passkey.pem",
         "passcertificate.pem",
         "signature",
-        f"{PK_PASS_NAME}.pass/pass.json",
+        "pass.json",
+    ]
+    asset_files = [
+        "signature",
+        "pass.json",
+        "manifest.json",
     ]
 
     for (_, _, filenames) in os.walk(f"{PK_PASS_NAME}.pass"):
@@ -80,13 +86,18 @@ def main():
             if filename in SUPPORTED_ASSET_FILES:
                 shutil.copy2(f"{PK_PASS_NAME}.pass/{filename}", filename)
                 asset_files_to_delete.append(filename)
+                asset_files.append(filename)
+
+    with ZipFile(f"{PK_PASS_NAME}.pkpass", "w") as zip_file:
+        for asset_file in asset_files:
+            zip_file.write(asset_file)
 
     for asset_file in asset_files_to_delete:
         os.remove(asset_file)
 
 
 def create_manifest_json(asset_path: str):
-    with open(f"{asset_path}/pass.json", "r") as f:
+    with open("pass.json", "r") as f:
         pass_json = json.loads(f.read())
 
     hashed_pass_json = hashlib.sha1(json.dumps(pass_json).encode("utf-8")).hexdigest()

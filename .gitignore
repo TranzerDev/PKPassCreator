@@ -8,3 +8,5 @@ WWDR.pem
 passcertificate.pem
 passkey.pem
 signature
+Generic.pkpass
+.DS_Store
