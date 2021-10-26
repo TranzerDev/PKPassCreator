@@ -37,7 +37,7 @@ def main():
         pass_type_identifier=PASS_TYPE_IDENTIFIER,
         team_identifier=TEAM_IDENTIFIER,
     )
-    pass_dict_json = json.dumps(pass_dict_copy, indent=4)
+    pass_dict_json = json.dumps(pass_dict_copy, indent=2)
     with open("pass.json", "w") as f:
         f.write(pass_dict_json)
 
@@ -92,15 +92,17 @@ def main():
         for asset_file in asset_files:
             zip_file.write(asset_file)
 
+    os.system(f"open {PK_PASS_NAME}.pkpass")
+
     for asset_file in asset_files_to_delete:
         os.remove(asset_file)
 
 
 def create_manifest_json(asset_path: str):
     with open("pass.json", "r") as f:
-        pass_json = json.loads(f.read())
+        pass_json = f.read()
 
-    hashed_pass_json = hashlib.sha1(json.dumps(pass_json).encode("utf-8")).hexdigest()
+    hashed_pass_json = hashlib.sha1(pass_json.encode('utf-8')).hexdigest()
 
     manifest_dict = {"pass.json": hashed_pass_json}
 
