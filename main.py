@@ -54,11 +54,11 @@ def main():
     arguments = parse_arguments()
 
     pass_type_identifier = arguments["pass_type_identifier"]
-    if pass_type_identifier is "":
+    if pass_type_identifier == "":
         raise Exception("pass type identifier is empty")
 
     team_identifier = arguments["team_identifier"]
-    if team_identifier is "":
+    if team_identifier == "":
         raise Exception("team identifier is empty")
 
     pass_dict_copy = create_pass_dict(
@@ -79,7 +79,7 @@ def main():
     if os_code != 0:
         raise Exception("could not create pass certificate")
 
-    key_password = arguments["key_password"]
+    key_password = "password"
     # Create pass key
     os_code = os.system(f"{OPENSSL_APP} pkcs12 -in {certificate_path} -nocerts -out passkey.pem -passin pass:{certificate_password} -passout pass:{key_password}")
     if os_code != 0:
@@ -121,7 +121,6 @@ def main():
 
 class Arguments(TypedDict):
     certificate_password: str
-    key_password: str
     pass_type_identifier: str
     team_identifier: str
     certificate_path: str
@@ -129,7 +128,6 @@ class Arguments(TypedDict):
 
 def parse_arguments() -> "Arguments":
     certificate_password: Optional[str] = None
-    key_password: Optional[str] = None
     pass_type_identifier: Optional[str] = None
     team_identifier: Optional[str] = None
     certificate_path: Optional[str] = None
@@ -141,39 +139,27 @@ def parse_arguments() -> "Arguments":
             skip_next_value = False
             continue
 
-        next_value_is_getable = index + 1 < len(sys.argv[index:])
-        next_value_index = index + 2
+        def get_next_value():
+            if index + 1 < len(sys.argv):
+                nonlocal skip_next_value
+                skip_next_value = True
+
+                return sys.argv[index + 2]
+
         match arg:
             case "--certificate-password":
-                if next_value_is_getable:
-                    certificate_password = sys.argv[next_value_index]
-                    skip_next_value = True
-            case "--pass-key-password":
-                if next_value_is_getable:
-                    key_password = sys.argv[next_value_index]
-                    skip_next_value = True
+                certificate_password = get_next_value()
             case "--pass-type-identifier":
-                if next_value_is_getable:
-                    pass_type_identifier = sys.argv[next_value_index]
-                    skip_next_value = True
+                pass_type_identifier = get_next_value()
             case "--team-identifier":
-                if next_value_is_getable:
-                    team_identifier = sys.argv[next_value_index]
-                    skip_next_value = True
+                team_identifier = get_next_value()
             case "--certificate-path":
-                if next_value_is_getable:
-                    certificate_path = sys.argv[next_value_index]
-                    skip_next_value = True
+                certificate_path = get_next_value()
             case "--wwdr-path":
-                if next_value_is_getable:
-                    wwdr_path = sys.argv[next_value_index]
-                    skip_next_value = True
+                wwdr_path = get_next_value()
 
     if certificate_password is None:
         certificate_password = input("what is the password of the provided certificate?\n")
-
-    if key_password is None:
-        key_password = input("provide a password for your passkey.pem\n")
 
     if pass_type_identifier is None:
         pass_type_identifier = input("provide a pass type identifier\n")
@@ -189,7 +175,6 @@ def parse_arguments() -> "Arguments":
 
     return {
         "certificate_password": certificate_password,
-        "key_password": key_password,
         "pass_type_identifier": pass_type_identifier,
         "team_identifier": team_identifier,
         "certificate_path": certificate_path,
