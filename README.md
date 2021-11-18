@@ -1,6 +1,6 @@
 # PKPassCreator
 
-This is a companion script for the blog
+This is a companion script for the blog [How to create your own wallet passes](https://tranzer.com/blogs/how-to-create-your-own-wallet-passes-pkpass/)
 
 ## Installation
 
